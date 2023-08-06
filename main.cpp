@@ -33,9 +33,9 @@ int main(int argc, char *argv[])
     unsigned char
         encrypt_test_string[32];
     unsigned char
-        test_key[32];
+        test_key[KEY_SIZE];
     unsigned char
-        init_vect_ctr_string[64];
+        init_vect_ctr_string[VECT_SIZE];
 
     unsigned char
         temp_vect[BLCK_SIZE] =
@@ -83,22 +83,46 @@ int main(int argc, char *argv[])
 
     QObject::connect(addButton, &QPushButton::clicked, [&]() {
         // Получаем текст из QLineEdit и складываем их
-        convert_hex(encrypt_test_string, 32, (lineEdit1->text().toStdString()).c_str());
-        convert_hex(test_key,32, (lineEdit2->text().toStdString()).c_str());
-        convert_hex(init_vect_ctr_string, 16, (lineEdit3->text().toStdString()+"0000000000000000").c_str());
-        uint8_t out_buf[64];
-        uint8_t out2[64];
+        if((lineEdit3->text().toStdString()).length() != VECT_SIZE)
+        {
+            std::string res = "Вектор должен быть 8 байт";
+            QString result = QString::fromStdString(res);
+            resultLabel->setText(result);
+            resultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        }
+        else if((lineEdit2->text().toStdString()).length() != 64)
+        {
+            std::string res = "Ключ должен быть 32 байта";
+            QString result = QString::fromStdString(res);
+            resultLabel->setText(result);
+            resultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        }
+        else if(((lineEdit1->text().toStdString()).length() % 16))
+        {
+            std::string res = "Строка должна быть кратна 16";
+            QString result = QString::fromStdString(res);
+            resultLabel->setText(result);
+            resultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        }
+        else
+        {
+        int size = (lineEdit1->text().toStdString()).length();
+        convert_hex(encrypt_test_string, size, (lineEdit1->text().toStdString()).c_str());
+        convert_hex(test_key,KEY_SIZE, (lineEdit2->text().toStdString()).c_str());
+        convert_hex(init_vect_ctr_string, VECT_SIZE, (lineEdit3->text().toStdString()+"0000000000000000").c_str());
+        uint8_t out_buf[size];
 
-        memcpy(temp_vect, init_vect_ctr_string, 16);
-        CTR_Crypt(init_vect_ctr_string, encrypt_test_string, out_buf, test_key, 32);
-        std::string res = convert_to_string(out_buf, 32);
+        memcpy(temp_vect, init_vect_ctr_string, VECT_SIZE);
+        CTR_Crypt(init_vect_ctr_string, encrypt_test_string, out_buf, test_key, size);
+        std::string res = convert_to_string(out_buf, size/2);
         QString result = QString::fromStdString(res);
 
         // Устанавливаем результат в QLabel
         resultLabel->setText(result);
         resultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        }
     });
-    window.setFixedSize(600, 250);
+    window.resize(600, 250);
     window.show();
 
     return app.exec();

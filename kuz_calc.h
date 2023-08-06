@@ -48,6 +48,7 @@ static const unsigned char l_vec[16] = {
 
 #define BLCK_SIZE 16
 #define KEY_SIZE 32
+#define VECT_SIZE 16
 
 typedef uint8_t vect[BLCK_SIZE]; //блок размером 128 бит
 
