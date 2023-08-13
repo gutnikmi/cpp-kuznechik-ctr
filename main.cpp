@@ -27,13 +27,24 @@ std::string convert_to_string(const unsigned char* arr, size_t size) {
     return result;
 }
 
+std::string reverse_hex(std::string str) {
+    std::reverse(str.begin(), str.end());
+    std::string result;
+    for (int i = 0; i < str.length(); i += 2) {
+        result += str[i+1];
+        result += str[i];
+    }
+    return result;
+}
+
+
 int main(int argc, char *argv[])
 {
 
     unsigned char
-        encrypt_test_string[32];
+        str_arr[32];
     unsigned char
-        test_key[KEY_SIZE];
+        key_arr[KEY_SIZE];
     unsigned char
         init_vect_ctr_string[VECT_SIZE];
 
@@ -42,6 +53,7 @@ int main(int argc, char *argv[])
         {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
+    bool checked = false;
 
     QApplication app(argc, argv);
 
@@ -55,6 +67,7 @@ int main(int argc, char *argv[])
 
     // Создаем QPushButton для сложения строк
     QPushButton* addButton = new QPushButton("Зашифровать/Расшифровать", &window);
+    QCheckBox* m_checkBox = new QCheckBox("Шифротекст как в ГОСТ", &window);
 
     // Создаем QLabel для вывода результата
     QLabel* resultLabel = new QLabel(&window);
@@ -75,13 +88,22 @@ int main(int argc, char *argv[])
     layout->addWidget(label3);
     layout->addWidget(lineEdit3);
     layout->addWidget(addButton);
+    layout->addWidget(m_checkBox);
     layout->addWidget(label4);
     layout->addWidget(resultLabel);
 
     // Устанавливаем лейаут для окна
     window.setLayout(layout);
+    QObject::connect(m_checkBox, &QCheckBox::stateChanged, [&]()
+    {
+        if (checked)
+            checked = false;
+        else
+            checked = true;
+    });
 
-    QObject::connect(addButton, &QPushButton::clicked, [&]() {
+    QObject::connect(addButton, &QPushButton::clicked, [&]()
+    {
         // Получаем текст из QLineEdit и складываем их
         if((lineEdit3->text().toStdString()).length() != VECT_SIZE)
         {
@@ -106,14 +128,22 @@ int main(int argc, char *argv[])
         }
         else
         {
+            std::string key_str = lineEdit2->text().toStdString();
+            std::string vect_str = lineEdit3->text().toStdString()+"0000000000000000";
+            if(checked)
+            {
+                key_str = reverse_hex(key_str);
+                vect_str = reverse_hex(vect_str);
+            }
         int size = (lineEdit1->text().toStdString()).length();
-        convert_hex(encrypt_test_string, size, (lineEdit1->text().toStdString()).c_str());
-        convert_hex(test_key,KEY_SIZE, (lineEdit2->text().toStdString()).c_str());
-        convert_hex(init_vect_ctr_string, VECT_SIZE, (lineEdit3->text().toStdString()+"0000000000000000").c_str());
+        convert_hex(str_arr, size, (lineEdit1->text().toStdString()).c_str());
+        convert_hex(key_arr,KEY_SIZE, (key_str.c_str()));
+        convert_hex(init_vect_ctr_string, VECT_SIZE, vect_str.c_str());
         uint8_t out_buf[size];
+        //reverse_array(str_arr, size);
 
         memcpy(temp_vect, init_vect_ctr_string, VECT_SIZE);
-        CTR_Crypt(init_vect_ctr_string, encrypt_test_string, out_buf, test_key, size);
+        CTR_Crypt(init_vect_ctr_string, str_arr, out_buf, key_arr, size, checked);
         std::string res = convert_to_string(out_buf, size/2);
         QString result = QString::fromStdString(res);
 

@@ -173,8 +173,21 @@ add_xor(const uint8_t *a, const uint8_t *b, uint8_t *c)
         c[i] = a[i]^b[i];
 }
 
+void reverse_array(unsigned char *array, int size)
+{
+    int i;
+    unsigned char temp;
+
+    for(i=0; i<size/2; i++)
+    {
+        temp = array[i];
+        array[i] = array[size-1-i];
+        array[size-1-i] = temp;
+    }
+}
+
 void
-CTR_Crypt(uint8_t *ctr, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_t size)
+CTR_Crypt(uint8_t *ctr, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_t size, bool ch)
 {
     uint64_t num_blocks = size / BLCK_SIZE;
     uint8_t gamma[BLCK_SIZE] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -185,6 +198,8 @@ CTR_Crypt(uint8_t *ctr, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_
     for (i = 0; i < num_blocks; i++)
     {
         GOST_Kuz_Encrypt(ctr, gamma);
+        if(ch)
+            reverse_array(gamma, BLCK_SIZE);
         inc_ctr(ctr);
         memcpy(internal, in_buf + i*BLCK_SIZE, BLCK_SIZE);
         add_xor(internal, gamma, internal);
