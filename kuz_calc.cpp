@@ -8,8 +8,6 @@ GOST_Kuz_S(const uint8_t *in_data, uint8_t *out_data)
         out_data[i] = Pi[in_data[i]];
 }
 
-
-
 static void
 GOST_Kuz_X(const uint8_t *a, const uint8_t *b, uint8_t *c)
 {
