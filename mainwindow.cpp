@@ -15,68 +15,51 @@ MainWindow::~MainWindow()
 
 QString MainWindow::crypt(QString data)
 {
-    unsigned char
-        str_arr[32];
-    unsigned char
-        key_arr[KEY_SIZE];
-    unsigned char
-        init_vect_ctr_string[VECT_SIZE];
+    unsigned char str_arr   [STR_SIZE];
+    unsigned char key_arr   [KEY_SIZE];
+    unsigned char vect_arr  [VECT_SIZE];
 
-    unsigned char
-        temp_vect[BLCK_SIZE] =
-        {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-    bool checked = true;
+    std::string key_str = ui->keyEdit->text().toStdString();
+    std::string vect_str = ui->vectorEdit->text().toStdString()+"0000000000000000";
+    std::string data_str = ui->dataEdit->text().toStdString();
+
+    int size = data_str.length();
+    uint8_t out_buf[size];
+
     QString result;
 
-    if((ui->vectorEdit->text().toStdString()).length() != VECT_SIZE)
+    if(vect_str.length() != VECT_SIZE + 16)
     {
-        std::string res = "Вектор должен быть 8 байт";
-        result = QString::fromStdString(res);
-        ui->resultEdit->setText(result);
+        return "Вектор должен быть 8 байт";
     }
-    else if((ui->keyEdit->text().toStdString()).length() != 64)
+    else if (key_str.length() != 64)
     {
-        std::string res = "Ключ должен быть 32 байта";
-        result = QString::fromStdString(res);
-        ui->resultEdit->setText(result);
+        return "Ключ должен быть 32 байта";
     }
-    else if(((ui->dataEdit->text().toStdString()).length() % 16))
+    else if (data_str.length() % 16)
     {
-        std::string res = "Строка должна быть кратна 16";
-        result = QString::fromStdString(res);
-        ui->resultEdit->setText(result);
+        return "Строка должна быть кратна 16";
     }
     else
     {
-        std::string key_str = ui->keyEdit->text().toStdString();
-        std::string vect_str = ui->vectorEdit->text().toStdString()+"0000000000000000";
-        if(checked)
-        {
-            key_str = reverse_hex(key_str);
-            vect_str = reverse_hex(vect_str);
-        }
-        int size = (ui->dataEdit->text().toStdString()).length();
-        convert_hex(str_arr, size, (ui->dataEdit->text().toStdString()).c_str());
-        convert_hex(key_arr,KEY_SIZE, (key_str.c_str()));
-        convert_hex(init_vect_ctr_string, VECT_SIZE, vect_str.c_str());
-        uint8_t out_buf[size];
-        //reverse_array(str_arr, size);
+        key_str  = reverse_hex(key_str);
+        vect_str = reverse_hex(vect_str);
 
-        memcpy(temp_vect, init_vect_ctr_string, VECT_SIZE);
-        CTR_Crypt(init_vect_ctr_string, str_arr, out_buf, key_arr, size, checked);
-        std::string res = convert_to_string(out_buf, size/2);
-        result = QString::fromStdString(res);
+        convert_hex(str_arr,  data_str.c_str(), size);
+        convert_hex(key_arr,  key_str.c_str(),  KEY_SIZE);
+        convert_hex(vect_arr, vect_str.c_str(), VECT_SIZE);
 
-        // Устанавливаем результат в QLabel
-         ui->resultEdit->setText(result);
+        Kuznechik kuz;
+
+        kuz.CTR_Crypt(vect_arr, str_arr, out_buf, key_arr, size);
+
+        result = QString::fromStdString(convert_to_string(out_buf, size/2));
     }
     return result;
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    crypt(ui->dataEdit->text());
+    ui->resultEdit->setText(crypt(ui->dataEdit->text()));
 }
 

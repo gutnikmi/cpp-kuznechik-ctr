@@ -14,7 +14,11 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    /*!
+     * \brief crypt - шифрует или расшифровывает данные
+     * \param data - данные
+     * \return шифротекст / расшифрованный текст
+     */
     QString crypt(QString data);
 
 private slots:

@@ -16,10 +16,18 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,1,1,1,1,1">
     <item row="1" column="0">
-     <widget class="QLineEdit" name="dataEdit"/>
+     <widget class="QLineEdit" name="dataEdit">
+      <property name="text">
+       <string>1122334455667700ffeeddccbbaa9988</string>
+      </property>
+     </widget>
     </item>
     <item row="3" column="0">
-     <widget class="QLineEdit" name="keyEdit"/>
+     <widget class="QLineEdit" name="keyEdit">
+      <property name="text">
+       <string>8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef</string>
+      </property>
+     </widget>
     </item>
     <item row="2" column="0">
      <widget class="QLabel" name="label_2">
@@ -46,7 +54,11 @@
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="QLineEdit" name="vectorEdit"/>
+     <widget class="QLineEdit" name="vectorEdit">
+      <property name="text">
+       <string>1234567890abcef0</string>
+      </property>
+     </widget>
     </item>
     <item row="0" column="0">
      <widget class="QLabel" name="label">
