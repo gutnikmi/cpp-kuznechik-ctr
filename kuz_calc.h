@@ -56,17 +56,18 @@ inline vect iter_C[32]; //итерационные константы C
 
 inline vect iter_key[10]; //итерационные ключи шифрования
 
-void
-GOST_Kuz_Expand_Key(const uint8_t *key);
+void GOST_Kuz_Expand_Key(const uint8_t *key);
 
-void
-GOST_Kuz_Destroy_Key();
+void GOST_Kuz_Destroy_Key();
 
-void
-GOST_Kuz_Encrypt(const uint8_t *blk, uint8_t *out_blk);
+void GOST_Kuz_Encrypt(const uint8_t *blk, uint8_t *out_blk);
 
-void
-CTR_Crypt(uint8_t *init_vec, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_t size, bool ch);
+void CTR_Crypt(uint8_t *init_vec, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_t size, bool ch);
 
-void
-reverse_array(unsigned char *array, int size);
+void reverse_array(unsigned char *array, int size);
+
+size_t convert_hex(uint8_t *dest, size_t count, const char *src);
+
+std::string convert_to_string(const unsigned char* arr, size_t size);
+
+std::string reverse_hex(std::string str);

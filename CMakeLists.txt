@@ -14,8 +14,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp
-        mainwindow.h
+
+
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -24,6 +24,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         kuz_calc.h
         kuz_calc.cpp
+        mainwindow.h mainwindow.cpp mainwindow.ui
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Kuznechik_ctr APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

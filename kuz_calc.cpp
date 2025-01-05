@@ -1,23 +1,21 @@
 #include "kuz_calc.h"
+#include <algorithm>
 
-static void
-GOST_Kuz_S(const uint8_t *in_data, uint8_t *out_data)
+static void GOST_Kuz_S(const uint8_t *in_data, uint8_t *out_data)
 {
     int i;
     for (i = 0; i < BLCK_SIZE; i++)
         out_data[i] = Pi[in_data[i]];
 }
 
-static void
-GOST_Kuz_X(const uint8_t *a, const uint8_t *b, uint8_t *c)
+static void GOST_Kuz_X(const uint8_t *a, const uint8_t *b, uint8_t *c)
 {
     int i;
     for (i = 0; i < BLCK_SIZE; i++)
         c[i] = a[i] ^ b[i];
 }
 
-static uint8_t
-GOST_Kuz_GF_mul(uint8_t a, uint8_t b)
+static uint8_t GOST_Kuz_GF_mul(uint8_t a, uint8_t b)
 {
     uint8_t c = 0;
     uint8_t hi_bit;
@@ -35,8 +33,7 @@ GOST_Kuz_GF_mul(uint8_t a, uint8_t b)
     return c;
 }
 
-static void
-GOST_Kuz_R(uint8_t *state)
+static void GOST_Kuz_R(uint8_t *state)
 {
     int i;
     uint8_t a_15 = 0;
@@ -51,8 +48,7 @@ GOST_Kuz_R(uint8_t *state)
 }
 
 
-static void
-GOST_Kuz_L(const uint8_t *in_data, uint8_t *out_data)
+static void GOST_Kuz_L(const uint8_t *in_data, uint8_t *out_data)
 {
     int i;
     vect internal;
@@ -63,8 +59,7 @@ GOST_Kuz_L(const uint8_t *in_data, uint8_t *out_data)
 }
 
 
-static void
-GOST_Kuz_Get_C()
+static void GOST_Kuz_Get_C()
 {
     int i;
     vect iter_num[32];
@@ -77,8 +72,7 @@ GOST_Kuz_Get_C()
          GOST_Kuz_L(iter_num[i], iter_C[i]);
 }
 
-static void
-GOST_Kuz_F(const uint8_t *in_key_1, const uint8_t *in_key_2,
+static void GOST_Kuz_F(const uint8_t *in_key_1, const uint8_t *in_key_2,
            uint8_t *out_key_1, uint8_t *out_key_2,
            uint8_t *iter_const)
 {
@@ -90,8 +84,7 @@ GOST_Kuz_F(const uint8_t *in_key_1, const uint8_t *in_key_2,
     GOST_Kuz_X(internal, in_key_2, out_key_1);
 }
 
-void
-GOST_Kuz_Expand_Key(const uint8_t *key)
+void GOST_Kuz_Expand_Key(const uint8_t *key)
 {
     int i;
     uint8_t key_1[KEY_SIZE/2];
@@ -122,17 +115,14 @@ GOST_Kuz_Expand_Key(const uint8_t *key)
     }
 }
 
-void
-GOST_Kuz_Destroy_Key()
+void GOST_Kuz_Destroy_Key()
 {
     int i;
     for (i = 0; i < 10; i++)
         memset(iter_key[i], 0x00, BLCK_SIZE);
 }
 
-
-void
-GOST_Kuz_Encrypt(const uint8_t *blk, uint8_t *out_blk)
+void GOST_Kuz_Encrypt(const uint8_t *blk, uint8_t *out_blk)
 {
     int i;
     memcpy(out_blk, blk, BLCK_SIZE);
@@ -147,9 +137,7 @@ GOST_Kuz_Encrypt(const uint8_t *blk, uint8_t *out_blk)
     GOST_Kuz_X(out_blk, iter_key[9], out_blk);
 }
 
-
-static void
-inc_ctr(uint8_t *ctr)
+static void inc_ctr(uint8_t *ctr)
 {
     int i;
     unsigned int internal = 0;
@@ -163,8 +151,7 @@ inc_ctr(uint8_t *ctr)
     }
 }
 
-static void
-add_xor(const uint8_t *a, const uint8_t *b, uint8_t *c)
+static void add_xor(const uint8_t *a, const uint8_t *b, uint8_t *c)
 {
     int i;
     for (i = 0; i < BLCK_SIZE; i++)
@@ -184,8 +171,7 @@ void reverse_array(unsigned char *array, int size)
     }
 }
 
-void
-CTR_Crypt(uint8_t *ctr, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_t size, bool ch)
+void CTR_Crypt(uint8_t *ctr, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_t size, bool ch)
 {
     uint64_t num_blocks = size / BLCK_SIZE;
     uint8_t gamma[BLCK_SIZE] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -205,4 +191,43 @@ CTR_Crypt(uint8_t *ctr, uint8_t *in_buf, uint8_t *out_buf, uint8_t *key, uint64_
         size = size - BLCK_SIZE;
     }
     GOST_Kuz_Destroy_Key();
+}
+
+size_t convert_hex(uint8_t *dest, size_t count, const char *src)
+{
+    char buf[3];
+    size_t i;
+    for (i = 0; i < count && *src; i++) {
+        buf[0] = *src++;
+        buf[1] = '\0';
+        if (*src) {
+            buf[1] = *src++;
+            buf[2] = '\0';
+        }
+        if (sscanf(buf, "%hhx", &dest[i]) != 1)
+            break;
+    }
+    return i;
+}
+std::string convert_to_string(const unsigned char* arr, size_t size)
+{
+
+    std::string result;
+    for (int i = 0; i < size; i++) {
+        char hex[3];
+        sprintf(hex, "%02x", arr[i]);
+        result += hex;
+    }
+    return result;
+}
+
+std::string reverse_hex(std::string str)
+{
+    std::reverse(str.begin(), str.end());
+    std::string result;
+    for (int i = 0; i < str.length(); i += 2) {
+        result += str[i+1];
+        result += str[i];
+    }
+    return result;
 }
